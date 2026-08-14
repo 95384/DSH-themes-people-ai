@@ -1,0 +1,4 @@
+# Add the people-ai loader entry to this profile.
+- insert:
+    - id: people-ai
+      name: people-ai
