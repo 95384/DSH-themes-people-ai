@@ -1,6 +1,6 @@
 {
   "name": "people-ai",
-  "version": "0.1.0",
+  "version": "0.9.4",
   "private": true,
   "description": "People's AI — fixed wallpaper for DeepSeek Harness Web",
   "type": "module",
