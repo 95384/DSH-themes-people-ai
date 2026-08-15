@@ -98,14 +98,14 @@ test('browser bundle installs wallpaper styles and overrides the base token', as
   // Cards & buttons inside the panel share the frosted material (same fill,
   // ring, and shadow as the panel itself); the selected state is re-applied
   // via the stable a11y hooks.
-  assert.match(created[0].textContent, /\[role="dialog"\]:has\(\[data-slot="settings\.section"\]\) ul:not\(li > ul\) > li/);
+  assert.match(created[0].textContent, /\[role="dialog"\]:has\(\[data-slot="settings\.section"\]\) ul:not\(li > ul\) li:not\(li li\)/);
   assert.match(created[0].textContent, /button\[aria-current="true"\]/);
   assert.match(created[0].textContent, /button\[data-active="true"\]/);
   // Tabs are text-only; card-interior buttons, card surfaces, and inputs
   // inside the panel are transparent.
   assert.match(created[0].textContent, /button\[role="tab"\]\{background:transparent/);
-  assert.match(created[0].textContent, /ul:not\(li > ul\) > li button\{background:transparent/);
-  assert.match(created[0].textContent, /ul:not\(li > ul\) > li\{background:transparent/);
+  assert.match(created[0].textContent, /ul:not\(li > ul\) li:not\(li li\) button\{background:transparent/);
+  assert.match(created[0].textContent, /ul:not\(li > ul\) li:not\(li li\)\{background:transparent/);
   assert.match(created[0].textContent, /input:not\(\[type="checkbox"\]\)/);
 
   // ── token overrides ──────────────────────────────────────────────────────
