@@ -110,6 +110,8 @@ test('browser bundle installs wallpaper styles and overrides the base token', as
   // Sidebar buttons: translucent frosted fill scoped to the JS-tagged marker.
   assert.match(created[0].textContent, /\[data-people-ai-sidebar\] button\{background:rgba\(15,17,21,0\.42\)/);
   assert.match(created[0].textContent, /\[data-people-ai-sidebar\] button:hover\{filter:brightness\(1\.18\)\}/);
+  // The locked Appearance note keeps its outline but has a transparent fill.
+  assert.match(created[0].textContent, /\.people-ai-appearance-locked-note\{[^}]*background:transparent/);
 
   // ── token overrides ──────────────────────────────────────────────────────
   assert.deepEqual([...exported.inject], ['theme', 'slots']);
