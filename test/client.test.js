@@ -95,6 +95,12 @@ test('browser bundle installs wallpaper styles and overrides the base token', as
   assert.match(created[0].textContent, /backdrop-filter:blur\(1px\)/);
   // Frosted-glass settings panel: dialog containing the settings.section seat.
   assert.match(created[0].textContent, /\[role="dialog"\]:has\(\[data-slot="settings\.section"\]\)/);
+  // Cards & buttons inside the panel share the frosted material (same fill,
+  // ring, and shadow as the panel itself); the selected state is re-applied
+  // via the stable a11y hooks.
+  assert.match(created[0].textContent, /\[role="dialog"\]:has\(\[data-slot="settings\.section"\]\) ul:not\(li > ul\) > li/);
+  assert.match(created[0].textContent, /button\[aria-current="true"\]/);
+  assert.match(created[0].textContent, /button\[data-active="true"\]/);
 
   // ── token overrides ──────────────────────────────────────────────────────
   assert.deepEqual([...exported.inject], ['theme', 'slots']);
