@@ -107,6 +107,9 @@ test('browser bundle installs wallpaper styles and overrides the base token', as
   assert.match(created[0].textContent, /ul:not\(li > ul\) li:not\(li li\) button\{background:transparent/);
   assert.match(created[0].textContent, /ul:not\(li > ul\) li:not\(li li\)\{background:transparent/);
   assert.match(created[0].textContent, /input:not\(\[type="checkbox"\]\)/);
+  // Sidebar buttons: translucent frosted fill scoped to the JS-tagged marker.
+  assert.match(created[0].textContent, /\[data-people-ai-sidebar\] button\{background:rgba\(15,17,21,0\.42\)/);
+  assert.match(created[0].textContent, /\[data-people-ai-sidebar\] button:hover\{filter:brightness\(1\.18\)\}/);
 
   // ── token overrides ──────────────────────────────────────────────────────
   assert.deepEqual([...exported.inject], ['theme', 'slots']);
@@ -217,4 +220,90 @@ test('hero headline rebrand replaces and restores the headline text', async () =
   // Unload restores the original headline.
   effects[1]();
   assert.equal(textNode.nodeValue, '探索未至之境');
+});
+
+test('sidebar marker tags the sidebar root via the settings trigger + fill token', async () => {
+  const source = await readFile(new URL('../lib/client.js', import.meta.url), 'utf8');
+  let definition;
+  let tagged = null;
+  const sidebarRoot = {
+    setAttribute(name, value) {
+      tagged = [name, value];
+    },
+  };
+  const footer = { parentElement: sidebarRoot };
+  const trigger = { parentElement: footer };
+  const FILL = 'rgba(24, 26, 32, 0.5)';
+  const context = vm.createContext({
+    window: {
+      __ModuleLoader__: {
+        load(value) {
+          definition = value;
+        },
+      },
+    },
+    document: {
+      body: { nodeType: 1, childNodes: [] },
+      querySelector(sel) {
+        if (sel === '[aria-haspopup="dialog"]') return trigger;
+        return null;
+      },
+      createElement(tag) {
+        const el = { dataset: {}, textContent: '', remove() {} };
+        return el;
+      },
+      head: {
+        appendChild() {},
+      },
+    },
+    getComputedStyle(el) {
+      return {
+        getPropertyValue() {
+          return FILL;
+        },
+        backgroundColor: el === sidebarRoot ? FILL : 'rgba(0, 0, 0, 0)',
+      };
+    },
+    MutationObserver: class {
+      constructor() {}
+      observe() {}
+      disconnect() {}
+    },
+  });
+  vm.runInContext(source, context, { filename: 'lib/client.js' });
+  const React = {
+    createElement() {},
+  };
+  const exported = definition.factory((name) => {
+    if (name === 'react') return React;
+    throw new Error('Unexpected browser dependency: ' + name);
+  });
+  const ctx = {
+    effect(factory) {
+      return factory();
+    },
+    on() {
+      return () => {};
+    },
+    theme: {
+      getTheme() {
+        return { preference: 'dark' };
+      },
+      setTheme() {},
+      overrideTokens() {
+        return () => {};
+      },
+    },
+    slots: {
+      inject() {},
+      register() {
+        return {};
+      },
+    },
+  };
+  exported.apply(ctx);
+  // Walking up from the settings trigger, the first ancestor whose computed
+  // background equals the sidebar-fill token is the sidebar root — tagged so
+  // the frosted button rules can scope to it.
+  assert.deepEqual(tagged, ['data-people-ai-sidebar', '']);
 });

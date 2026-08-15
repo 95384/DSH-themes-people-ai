@@ -11,6 +11,7 @@ DeepSeek Harness Web 的固定壁纸插件。把 Web 界面的应用背景替换
 - Client 注入根背景样式，并通过官方 `theme.overrideTokens` 把基底 token `--dsw-alias-bg-base` 覆盖为半透明底色（主区域保留底色、壁纸透出），侧边栏 token `--dsw-specific-sidebar-fill` 覆盖为半透明。
 - 抬升表面（`--dsw-alias-bg-layer-*`）保持不透明，卡片内容可读。
 - **输入框毛玻璃**：消息输入卡片（composer，官方稳定 `data-composer-card` 钩子）覆盖为半透明底色 + `backdrop-filter: blur(1px)`，壁纸在输入框后透出。
+- **侧边栏按钮毛玻璃**：侧边栏根部没有稳定属性，故由客户端 JS 打上自有标记 `data-people-ai-sidebar`（从设置触发器 `[aria-haspopup="dialog"]` 向上找第一个计算背景等于 `--dsw-specific-sidebar-fill` token 的祖先，即侧边栏根；MutationObserver 兜底延迟挂载/重挂载，卸载时移除标记）；该标记内的所有按钮（新会话、收起/展开、搜索、视图选项、添加工作区、设置等）统一为与面板相同的半透明毛玻璃底（0.42 透明度 + 1px 模糊，**不加描边与投影**，避免小图标按钮出现"方框感"），悬停以 `brightness` 变亮。
 - **设置面板毛玻璃**：设置对话框（`role="dialog"` 且内含官方 `data-slot="settings.section"` 内容座位，`:has()` 精确定位、不误伤其他对话框）覆盖为半透明底色 + 轻微模糊；面板内的小卡片与小按钮使用与面板相同的毛玻璃材质（半透明底色 + 1px 主题描边光晕 + 投影），并透过稳定钩子保留状态：页签（`button[role="tab"]`，插件配置/插件列表/用户插件）与卡片内部按钮（顶层卡片 `li` 内的 header/footer 按钮）保持**纯文字、无方框**，卡片本体与输入框（原生 `input`/`textarea`/`select`）**背景透明**（保留描边），选中态以 `aria-current`/`data-active` 施加更实底色、悬停以 `brightness` 还原。
 - **深色锁定**：加载时强制 `setTheme('dark')`，监听 `theme/change` 把任何非深色切换弹回，并把设置面板"外观"行替换为只读锁定提示；卸载时恢复之前的主题偏好。
 - **新会话标题改名**：创建新会话界面的"探索未至之境"标题替换为"人民的AI"（英文界面同步替换 "Into the Unknown"）。
@@ -26,7 +27,7 @@ DeepSeek Harness Web 的固定壁纸插件。把 Web 界面的应用背景替换
 - 设置面板毛玻璃通过 `[role="dialog"]:has([data-slot="settings.section"])` 定位（官方无障碍角色 + 官方 slot 数据属性，`:has()` 仅命中设置对话框）；半透明底色 + 1px 模糊，并叠加 1px 主题边框光晕（`box-shadow: 0 0 0 1px var(--dsw-alias-border-l3)`）与加强投影，保证面板边缘与周围对比清晰；透明度、模糊与光晕数值见源码注释。面板内卡片以 `ul:not(li > ul) li:not(li li)` 定位（顶层 `ul` 下、自身不在任何 `li` 内的 `li`：同时覆盖直接子级与 `display:contents` 包装层两种结构，且不命中卡片内部嵌套列表），随后三条细化规则覆盖之：页签（`button[role="tab"]`）与卡片内部按钮（`ul:not(li > ul) li:not(li li) button`）恢复纯文字（透明底、无光晕），卡片本体（`ul:not(li > ul) li:not(li li)`）背景透明（保留描边与投影），原生输入框（`input` 排除 checkbox/radio/hidden/file、`textarea`、`select`）背景透明（保留产品自带边框）；悬停反馈用 `filter: brightness()` 还原，选中态（导航 `aria-current`、页签 `data-active`）重新施加更实的底色与描边。
 - 新会话标题：官方 locale 字典不可补丁（同命名空间重复注册会抛错）且标题无 Slot 座位，故按**精确文本匹配**在 DOM 中替换（不依赖类名/选择器），MutationObserver 只处理新增与变化的节点（避免流式输出下的全量扫描），卸载时恢复原文本。
 - 深色锁定分三层：初始化 `setTheme('dark')` → `theme/change` 弹回兜底（覆盖所有切换路径）→ shadow 官方 `settings.general.item` 的 `appearance` 条目（同 id、priority -1，slots 机制允许的低优先级替换），渲染只读"深色主题（由 people-ai 锁定）"行。
-- 客户端样式、token 覆盖与 slot 替换均不依赖任何内部 DOM 结构，符合 Harness 客户端插件契约。
+- 客户端样式、token 覆盖与 slot 替换均不依赖任何内部 DOM 结构，符合 Harness 客户端插件契约。侧边栏按钮的定位是唯一例外：侧边栏根无稳定属性，插件以 JS 打上自有 `data-people-ai-sidebar` 标记后再用 CSS 作用域定位（详见上文功能说明）。
 
 ## 环境要求
 
