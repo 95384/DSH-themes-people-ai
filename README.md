@@ -11,7 +11,7 @@ DeepSeek Harness Web 的固定壁纸插件。把 Web 界面的应用背景替换
 - Client 注入根背景样式，并通过官方 `theme.overrideTokens` 把基底 token `--dsw-alias-bg-base` 覆盖为半透明底色（主区域保留底色、壁纸透出），侧边栏 token `--dsw-specific-sidebar-fill` 覆盖为半透明。
 - 抬升表面（`--dsw-alias-bg-layer-*`）保持不透明，卡片内容可读。
 - **输入框毛玻璃**：消息输入卡片（composer，官方稳定 `data-composer-card` 钩子）覆盖为半透明底色 + `backdrop-filter: blur(1px)`，壁纸在输入框后透出。
-- **设置面板毛玻璃**：设置对话框（`role="dialog"` 且内含官方 `data-slot="settings.section"` 内容座位，`:has()` 精确定位、不误伤其他对话框）覆盖为半透明底色 + 轻微模糊；面板内的小卡片（`ul > li` 卡片列表：插件/模型/预设卡片）与小按钮（导航项、页签、行内操作）使用与面板相同的毛玻璃材质（同款半透明底色 + 1px 主题描边光晕 + 投影），并透过稳定无障碍钩子（`aria-current` 导航选中、`data-active` 页签选中）保留选中态、以 `brightness` 还原悬停反馈。
+- **设置面板毛玻璃**：设置对话框（`role="dialog"` 且内含官方 `data-slot="settings.section"` 内容座位，`:has()` 精确定位、不误伤其他对话框）覆盖为半透明底色 + 轻微模糊；面板内的小卡片与小按钮使用与面板相同的毛玻璃材质（半透明底色 + 1px 主题描边光晕 + 投影），并透过稳定钩子保留状态：页签（`button[role="tab"]`，插件配置/插件列表/用户插件）与卡片内部按钮（`ul > li` 内的 header/footer 按钮）保持**纯文字、无方框**，卡片本体与输入框（原生 `input`/`textarea`/`select`）**背景透明**（保留描边），选中态以 `aria-current`/`data-active` 施加更实底色、悬停以 `brightness` 还原。
 - **深色锁定**：加载时强制 `setTheme('dark')`，监听 `theme/change` 把任何非深色切换弹回，并把设置面板"外观"行替换为只读锁定提示；卸载时恢复之前的主题偏好。
 - **新会话标题改名**：创建新会话界面的"探索未至之境"标题替换为"人民的AI"（英文界面同步替换 "Into the Unknown"）。
 - 样式标签、token 覆盖层、事件监听与设置行替换均由插件 Fiber 管理，卸载时自动移除。
@@ -23,7 +23,7 @@ DeepSeek Harness Web 的固定壁纸插件。把 Web 界面的应用背景替换
 - 图片字节在首次请求时读取并缓存于插件 Fiber 内，路由与缓存随插件停止自动清理。
 - `lib/client.js` 向 `document.head` 插入一个 `style` 标签（选择器 `html,body`，通用根选择器，不使用产品哈希类名），并把 `--dsw-alias-bg-base` 覆盖为半透明底色、`--dsw-specific-sidebar-fill` 覆盖为半透明（数值见源码注释，可自行微调 alpha）。
 - 输入框毛玻璃通过官方稳定 data 属性钩子 `[data-composer-card]` 定位（非哈希类名），半透明背景 + `backdrop-filter: blur(1px)`；模糊半径与透明度见源码注释。
-- 设置面板毛玻璃通过 `[role="dialog"]:has([data-slot="settings.section"])` 定位（官方无障碍角色 + 官方 slot 数据属性，`:has()` 仅命中设置对话框）；半透明底色 + 1px 模糊，并叠加 1px 主题边框光晕（`box-shadow: 0 0 0 1px var(--dsw-alias-border-l3)`）与加强投影，保证面板边缘与周围对比清晰；透明度、模糊与光晕数值见源码注释。面板内卡片与按钮以 `ul:not(li > ul) > li`（仅最外层卡片列表，不命中卡片内部嵌套列表）与 `button` 结构选择器套用同一材质；悬停反馈用 `filter: brightness()` 还原，选中态（导航 `aria-current`、页签 `data-active`）重新施加更实的底色与描边。
+- 设置面板毛玻璃通过 `[role="dialog"]:has([data-slot="settings.section"])` 定位（官方无障碍角色 + 官方 slot 数据属性，`:has()` 仅命中设置对话框）；半透明底色 + 1px 模糊，并叠加 1px 主题边框光晕（`box-shadow: 0 0 0 1px var(--dsw-alias-border-l3)`）与加强投影，保证面板边缘与周围对比清晰；透明度、模糊与光晕数值见源码注释。面板内卡片以 `ul:not(li > ul) > li`（仅最外层卡片列表，不命中卡片内部嵌套列表）套用同一材质，随后三条细化规则覆盖之：页签（`button[role="tab"]`）与卡片内部按钮（`ul:not(li > ul) > li button`）恢复纯文字（透明底、无光晕），卡片本体（`ul:not(li > ul) > li`）背景透明（保留描边与投影），原生输入框（`input` 排除 checkbox/radio/hidden/file、`textarea`、`select`）背景透明（保留产品自带边框）；悬停反馈用 `filter: brightness()` 还原，选中态（导航 `aria-current`、页签 `data-active`）重新施加更实的底色与描边。
 - 新会话标题：官方 locale 字典不可补丁（同命名空间重复注册会抛错）且标题无 Slot 座位，故按**精确文本匹配**在 DOM 中替换（不依赖类名/选择器），MutationObserver 只处理新增与变化的节点（避免流式输出下的全量扫描），卸载时恢复原文本。
 - 深色锁定分三层：初始化 `setTheme('dark')` → `theme/change` 弹回兜底（覆盖所有切换路径）→ shadow 官方 `settings.general.item` 的 `appearance` 条目（同 id、priority -1，slots 机制允许的低优先级替换），渲染只读"深色主题（由 people-ai 锁定）"行。
 - 客户端样式、token 覆盖与 slot 替换均不依赖任何内部 DOM 结构，符合 Harness 客户端插件契约。

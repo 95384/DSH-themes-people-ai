@@ -101,6 +101,12 @@ test('browser bundle installs wallpaper styles and overrides the base token', as
   assert.match(created[0].textContent, /\[role="dialog"\]:has\(\[data-slot="settings\.section"\]\) ul:not\(li > ul\) > li/);
   assert.match(created[0].textContent, /button\[aria-current="true"\]/);
   assert.match(created[0].textContent, /button\[data-active="true"\]/);
+  // Tabs are text-only; card-interior buttons, card surfaces, and inputs
+  // inside the panel are transparent.
+  assert.match(created[0].textContent, /button\[role="tab"\]\{background:transparent/);
+  assert.match(created[0].textContent, /ul:not\(li > ul\) > li button\{background:transparent/);
+  assert.match(created[0].textContent, /ul:not\(li > ul\) > li\{background:transparent/);
+  assert.match(created[0].textContent, /input:not\(\[type="checkbox"\]\)/);
 
   // ── token overrides ──────────────────────────────────────────────────────
   assert.deepEqual([...exported.inject], ['theme', 'slots']);
