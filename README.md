@@ -23,7 +23,7 @@ DeepSeek Harness Web 的固定壁纸插件。把 Web 界面的应用背景替换
 - 图片字节在首次请求时读取并缓存于插件 Fiber 内，路由与缓存随插件停止自动清理。
 - `lib/client.js` 向 `document.head` 插入一个 `style` 标签（选择器 `html,body`，通用根选择器，不使用产品哈希类名），并把 `--dsw-alias-bg-base` 覆盖为半透明底色、`--dsw-specific-sidebar-fill` 覆盖为半透明（数值见源码注释，可自行微调 alpha）。
 - 输入框毛玻璃通过官方稳定 data 属性钩子 `[data-composer-card]` 定位（非哈希类名），半透明背景 + `backdrop-filter: blur(1px)`；模糊半径与透明度见源码注释。
-- 设置面板毛玻璃通过 `[role="dialog"]:has([data-slot="settings.section"])` 定位（官方无障碍角色 + 官方 slot 数据属性，`:has()` 仅命中设置对话框）；透明度与模糊见源码注释。
+- 设置面板毛玻璃通过 `[role="dialog"]:has([data-slot="settings.section"])` 定位（官方无障碍角色 + 官方 slot 数据属性，`:has()` 仅命中设置对话框）；半透明底色 + 1px 模糊，并叠加 1px 主题边框光晕（`box-shadow: 0 0 0 1px var(--dsw-alias-border-l3)`）与加强投影，保证面板边缘与周围对比清晰；透明度、模糊与光晕数值见源码注释。
 - 新会话标题：官方 locale 字典不可补丁（同命名空间重复注册会抛错）且标题无 Slot 座位，故按**精确文本匹配**在 DOM 中替换（不依赖类名/选择器），MutationObserver 只处理新增与变化的节点（避免流式输出下的全量扫描），卸载时恢复原文本。
 - 深色锁定分三层：初始化 `setTheme('dark')` → `theme/change` 弹回兜底（覆盖所有切换路径）→ shadow 官方 `settings.general.item` 的 `appearance` 条目（同 id、priority -1，slots 机制允许的低优先级替换），渲染只读"深色主题（由 people-ai 锁定）"行。
 - 客户端样式、token 覆盖与 slot 替换均不依赖任何内部 DOM 结构，符合 Harness 客户端插件契约。
